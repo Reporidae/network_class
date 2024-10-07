@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdio.h>I
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 
 #define BUFF_SIZE 1024
+#define PORT 9000
 
 int main(int argc, char **argv)
 {
@@ -23,7 +24,8 @@ int main(int argc, char **argv)
 	
 	memset(&server_addr, 0x00, sizeof(server_addr));
 	memset(&client_addr, 0x00, sizeof(client_addr));
-	
+
+	//server socket generation	
 	server_socket = socket(PF_INET, SOCK_STREAM, 0);
 	if(-1 == server_socket)
 	{
@@ -33,15 +35,17 @@ int main(int argc, char **argv)
 
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(4000);
+	server_addr.sin_port = htons(PORT);
 	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-
+	
+	//server socket and address binding
 	if(-1 == bind(server_socket, (struct sockaddr*)&server_addr, sizeof(server_addr)))
 	{
 		printf("bind() execution error\n");
 		exit(1);
 	}
 
+	//connection ready
 	if(-1 == listen(server_socket, 5))
 	{
 		printf("listen() execution failure\n");
@@ -50,6 +54,7 @@ int main(int argc, char **argv)
 
 	while(1)
 	{
+		//client connection accept
 		client_addr_size = sizeof(client_addr);
 		client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &client_addr_size);
 
@@ -59,11 +64,24 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 
-		read(client_socket, buff_rcv, BUFF_SIZE);
-		printf("receive: %s\n", buff_rcv);
+		while (1)
+		{
+			//data check
+			read(client_socket, buff_rcv, BUFF_SIZE);
+			printf("receive: %s\n", buff_rcv);
 
-		sprintf(buff_snd, "%d : %s", strlen(buff_rcv), buff_rcv);
-		write(client_socket, buff_snd, strlen(buff_snd)+1);
-		close(client_socket);
+			// bye
+			if(strcmp(buff_rcv, "bye") == 0)
+			{
+				printf("bye END\n");
+				close(client_socket);
+				break;
+			}
+			sprintf(buff_snd, "%d : %s", strlen(buff_rcv), buff_rcv);
+			write(client_socket, buff_snd, strlen(buff_snd)+1);
+			
+		}		
 	}
+	close(client_socket);
+	return 0;
 }
