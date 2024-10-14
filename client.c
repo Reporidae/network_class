@@ -12,7 +12,7 @@
 int main(int argc, char **argv)
 {
 	int client_socket;
-	
+	//int ret;
 	struct sockaddr_in server_addr;
 
 	char buff[BUFF_SIZE+5];
@@ -41,20 +41,46 @@ int main(int argc, char **argv)
 	{
 		printf("Enter Message (type 'bye' to quit): ");
 		fgets(buff, sizeof(buff), stdin);
+		//scanf("%s", buff);
 		buff[strcspn(buff, "\n")] = 0;
 
 		write(client_socket, buff, strlen(buff) + 1);
-		
+		//ret = write(client_socket, buff, strlen(buff) + 1);
+		/*
+			if ( ret < 0)
+			{
+   			printf("error");
+			break;
+			}
+		*/
 		if(strcmp(buff, "bye") == 0)
 		{
 			break;
 		}
-
+/*
+		if(strlen(buff) ==1) && (buff[0] == 'q')
+		{
+			printf("client end\n");
+			break;
+		}
+*/
+		//memset(buff,000,sizeof(buff);
 		read(client_socket, buff, BUFF_SIZE);
+		//ret = read(client_socket, buff, BUFF_SIZE);
+
+		/*
+			if ( ret < 0)
+			{
+   			printf("read error");
+			break;
+			}
+		*/
+		
 		printf("response from server: %s\n", buff);
 	}
 
 	// close socket
+	//sleep(1);
 	close(client_socket);
 	return 0;
 
